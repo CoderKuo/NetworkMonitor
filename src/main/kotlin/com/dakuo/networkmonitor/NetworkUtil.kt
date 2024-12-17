@@ -1,38 +1,53 @@
 package com.dakuo.networkmonitor
 
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
-import taboolib.common.reflect.ClassHelper
+import taboolib.common.util.unsafeLazy
 import taboolib.library.reflex.Reflex.Companion.getProperty
-import taboolib.library.reflex.Reflex.Companion.invokeMethod
-import taboolib.module.nms.MinecraftVersion.isUniversal
-import taboolib.module.nms.MinecraftVersion.minecraftVersion
+import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.nmsProxy
 
 object NetworkUtil {
 
     fun getNetworkManager(player: Player): Any {
-        val cbPlayer = getCBPlayer()!!.cast(player)
-        val nmsPlayer = cbPlayer.invokeMethod<Any>("getHandle")!!
-        val connection = nmsPlayer.getProperty<Any>("connection")!!
-        return connection.getProperty<Any>("connection", findToParent = true)!!
+//        val cbPlayer = (player as CraftPlayer).handle
+////        val nmsPlayer = cbPlayer.invokeMethod<Any>("getHandle")!!
+//        val connection = cbPlayer.getProperty<Any>("playerConnection")!!
+        return NMSConnection.INSTANCE.getNetworkManager(player)
     }
 
-    fun getCBPlayer(): Class<*>? {
-        val version = minecraftVersion
-        val clazz = if (version == "UNKNOWN") {
-            "org.bukkit.craftbukkit.entity.CraftPlayer"
-        } else {
-            "org.bukkit.craftbukkit.$version.entity.CraftPlayer"
+//    fun getCBPlayer(): Class<*> {
+//        try {
+//            return nmsClass("CraftPlayer")
+//        } catch (var4: ClassNotFoundException) {
+//            val exception = var4
+//            throw RuntimeException("[LightInjector] Cannot find CB Class! (CraftPlayer)", exception)
+//        }
+//
+//    }
+
+    abstract class NMSConnection {
+
+        abstract fun getNetworkManager(player: Player): Any
+
+        companion object {
+            val INSTANCE by unsafeLazy {
+                nmsProxy<NMSConnection>()
+            }
         }
+    }
 
-
-        try {
-            return ClassHelper.getClass(clazz)
-        } catch (var4: ClassNotFoundException) {
-            val exception = var4
-            throw RuntimeException("[LightInjector] Cannot find CB Class! ($clazz)", exception)
+    class NMSConnectionImpl : NMSConnection() {
+        override fun getNetworkManager(player: Player): Any {
+            val nmsPlayer = (player as CraftPlayer).handle
+            val connection = nmsPlayer.getProperty<Any>(if (MinecraftVersion.isUniversal) "connection" else "playerConnection")!!
+            return if (MinecraftVersion.isUniversal) {
+                connection.getProperty<Any>("connection", findToParent = true)!!
+            } else {
+                connection.getProperty<Any>("networkManager", findToParent = true)!!
+            }
         }
 
     }
-
 
 }

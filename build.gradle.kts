@@ -1,12 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import io.izzel.taboolib.gradle.*
-import io.izzel.taboolib.gradle.Basic
-import io.izzel.taboolib.gradle.Bukkit
-import io.izzel.taboolib.gradle.BukkitUtil
-import io.izzel.taboolib.gradle.MinecraftChat
-import io.izzel.taboolib.gradle.I18n
-import io.izzel.taboolib.gradle.Metrics
-import io.izzel.taboolib.gradle.CommandHelper
 
 
 plugins {
@@ -30,7 +23,7 @@ taboolib {
     description {
         name = "NetworkMonitor"
     }
-    version { taboolib = "6.2.0-beta36" }
+    version { taboolib = "6.2.0" }
 }
 
 repositories {
@@ -38,8 +31,14 @@ repositories {
 }
 
 dependencies {
-    compileOnly("ink.ptms.core:v12004:12004:mapped")
-    compileOnly("ink.ptms.core:v12004:12004:universal")
+    compileOnly("ink.ptms.core:v12002:12002-minimize:mapped")
+    compileOnly("ink.ptms.core:v12002:12002-minimize:universal")
+    compileOnly("ink.ptms.core:v12100:12100-minimize:mapped")
+    compileOnly("ink.ptms.core:v12100:12100-minimize:universal")
+    compileOnly("ink.ptms.core:v11801:11801:mapped")
+    compileOnly("ink.ptms.core:v11801:11801:universal")
+    compileOnly("ink.ptms.core:v11200:11200")
+    compileOnly("ink.ptms.core:v11605:11605")
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))
 

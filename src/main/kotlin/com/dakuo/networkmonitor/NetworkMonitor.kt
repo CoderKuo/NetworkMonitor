@@ -4,7 +4,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import taboolib.common.platform.Plugin
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.console
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.submitAsync
 import java.util.concurrent.ConcurrentHashMap
@@ -21,14 +23,14 @@ object NetworkMonitor : Plugin() {
         }
 
 
-        submitAsync(period = 60) {
-            displayTrafficStats()
-        }
+//        submitAsync(period = 60) {
+//            displayTrafficStats()
+//        }
 
         info("Successfully running NetworkMonitor!")
     }
 
-    private fun displayTrafficStats() {
+    fun displayTrafficStats(sender: ProxyCommandSender? = null) {
         val header = """
         |=============================================
         | 玩家流量统计 (最近 60 秒)
@@ -36,17 +38,17 @@ object NetworkMonitor : Plugin() {
         | 玩家名         | 下载 (KB)   | 上传 (KB)
         |---------------------------------------------
     """.trimMargin()
-        println(header)
+        (sender ?: console()).sendMessage(header)
 
         monitorHandlers.forEach { (player, handler) ->
             val incomingKb = handler.getLastMinuteIncomingBytes() / 1024.0
             val outgoingKb = handler.getLastMinuteOutgoingBytes() / 1024.0
 
             val row = String.format("| %-15s | %12.2f | %12.2f |", player.name, incomingKb, outgoingKb)
-            println(row)
+            (sender ?: console()).sendMessage(row)
         }
 
-        println("|=============================================")
+        (sender ?: console()).sendMessage("|=============================================")
     }
 
 
